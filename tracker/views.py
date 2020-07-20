@@ -7,16 +7,19 @@ from rest_framework.views import APIView
 
 
 class TasksView(APIView):
-    """
-    This class is for all tasks
-    """
 
     def get(self, request):
+        """
+        Returns all of tasks
+        """
         tasks = Task.objects.all()
         serializer = TasksSerializer(tasks, many=True)
         return Response({'tasks': serializer.data, 'len': len(serializer.data)})
 
     def post(self, request):
+        """
+        Adds a new task to database
+        """
         serializer = TasksSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -25,22 +28,28 @@ class TasksView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        try:
-            Task.objects.all().delete()
-            return Response({'message': 'All tasks deleted'}, status=status.HTTP_200_OK)
-        except:
-            return Response({'Something\'s wrong'}, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Deletes all of the tasks
+        """
+        Task.objects.all().delete()
+        return Response({'message': 'All tasks deleted'}, status=status.HTTP_200_OK)
 
 
 class TaskView(APIView):
 
     def get_object(self, task_uuid):
+        """
+        Finds and returns an object based on the key provided
+        """
         try:
             return Task.objects.get(uuid=task_uuid)
         except Task.DoesNotExist:
             return Http404
 
     def put(self, request):
+        """
+        Updates the task => mainly for finishing task
+        """
         try:
             task = self.get_object(request.data['uuid'])
         except Task.DoesNotExist:
@@ -55,11 +64,17 @@ class TaskView(APIView):
 class ProjectView(APIView):
 
     def get(self, request):
+        """
+        Sends all of the projects
+        """
         projects = Project.objects.all()
         serializer = ProjectSerializer(projects, many=True)
         return Response({'projects': serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Add new project
+        """
         serializer = ProjectSerializer(data=request.data)
         print(serializer)
         if serializer.is_valid():
@@ -69,6 +84,9 @@ class ProjectView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
+        """
+        Delete project based on the uuid
+        """
         try:
             uuid = request.data['uuid']
             project = Project.objects.get(uuid=uuid)
