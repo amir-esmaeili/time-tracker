@@ -24,9 +24,7 @@ class ReportView(APIView):
         else:
             return Response({'message': 'Chosen period must be day/week/month.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        tasks = self.get_object(days)
-
-        work_hours = list()
+        work_hours = dict()
 
         start_date = date.today() - timedelta(days=days-1)
 
@@ -36,17 +34,15 @@ class ReportView(APIView):
                 time_in_hour = 0
                 for t in task:
                     time_in_hour += (t.end_time - t.start_time).total_seconds()/3600
-                work_hours.append(time_in_hour.__round__(2))
+                work_hours[start_date.strftime('%b-%d')] = time_in_hour.__round__(2)
             else:
-                work_hours.append(0)
+                work_hours[start_date.strftime('%b-%d')] = 0
 
             start_date += timedelta(days=1)
 
         return Response({
-            'start_date': date.today() - timedelta(days=days-1),
-            'end_date': date.today(),
             'work_hours': work_hours,
-            'total': sum(work_hours)
+            'total': sum(work_hours.values())
         }, status=status.HTTP_200_OK)
 
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from .serializer import TasksSerializer, ProjectSerializer
 from .models import Task, Project
 from django.http import Http404
@@ -12,9 +13,13 @@ class TasksView(APIView):
         """
         Returns all of tasks
         """
-        tasks = Task.objects.all()
-        serializer = TasksSerializer(tasks, many=True)
-        return Response({'tasks': serializer.data, 'len': len(serializer.data)})
+        done = Task.objects.filter(end_time__isnull=False)
+        tasks = Task.objects.filter(end_time__isnull=True)
+        serializer_done = TasksSerializer(done, many=True)
+        serializer_tasks = TasksSerializer(tasks, many=True)
+        return Response({'tasks': serializer_tasks.data,
+                         'done': serializer_done.data,
+                         'len': len(serializer_tasks.data)+len(serializer_done.data)})
 
     def post(self, request):
         """
@@ -59,6 +64,19 @@ class TaskView(APIView):
             serializer.save()
             return Response({'message': 'updated', 'data': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, uuid):
+        """
+        Delete task based on the uuid
+        """
+        try:
+            task = Task.objects.get(uuid=uuid)
+            task.delete()
+            return Response({'message': 'task deleted'})
+        except Task.DoesNotExist:
+            return Http404
+        except KeyError:
+            return Response({'message': 'body doesn\'t contain uuid'})
 
 
 class ProjectView(APIView):

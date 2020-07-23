@@ -10,13 +10,13 @@ class Project(models.Model):
 
 class Task(models.Model):
     tag_choices = [
-        ('p', 'Personal'),
-        ('c', 'Client'),
+        ('personal', 'Personal'),
+        ('client', 'Client'),
     ]
 
     title = models.CharField(max_length=200, blank=False)
     uuid = models.UUIDField(default=uuid4)
     tag = models.CharField(max_length=50, choices=tag_choices)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    start_time = models.DateTimeField(auto_now=True)
+    start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True)
