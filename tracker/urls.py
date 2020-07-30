@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import TasksView, TaskView, ProjectView
+from .views import TasksView, ProjectsView, TasksModifyView
 
 
 urlpatterns = [
-    path('', TasksView.as_view(), name='all-tasks'),
-    path('task/', TaskView.as_view(), name='a-task'),
-    path('task/<slug:uuid>/', TaskView.as_view(), name='delete'),
-    path('project/', ProjectView.as_view(), name='project')
+    path('', TasksView.as_view(), name='all_tasks'),
+    path('<slug:uuid>/', TasksModifyView.as_view(), name='a_task'),
 ]

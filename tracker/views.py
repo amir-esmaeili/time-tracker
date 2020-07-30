@@ -1,10 +1,10 @@
-from datetime import datetime
-from .serializer import TasksSerializer, ProjectSerializer
-from .models import Task, Project
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from .models import Task, Project
+from .serializer import TasksSerializer, ProjectSerializer
 
 
 class TasksView(APIView):
@@ -19,7 +19,7 @@ class TasksView(APIView):
         serializer_tasks = TasksSerializer(tasks, many=True)
         return Response({'tasks': serializer_tasks.data,
                          'done': serializer_done.data,
-                         'len': len(serializer_tasks.data)+len(serializer_done.data)})
+                         'len': len(serializer_tasks.data) + len(serializer_done.data)})
 
     def post(self, request):
         """
@@ -33,14 +33,11 @@ class TasksView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        """
-        Deletes all of the tasks
-        """
         Task.objects.all().delete()
         return Response({'message': 'All tasks deleted'}, status=status.HTTP_200_OK)
 
 
-class TaskView(APIView):
+class TasksModifyView(APIView):
 
     def get_object(self, task_uuid):
         """
@@ -51,12 +48,25 @@ class TaskView(APIView):
         except Task.DoesNotExist:
             return Http404
 
-    def put(self, request):
+    def delete_task(self, uuid):
+        """
+        Delete task based on the uuid
+        """
+        try:
+            task = self.get_object(uuid)
+            task.delete()
+            return Response({'message': 'task deleted'})
+        except Task.DoesNotExist:
+            return Http404
+        except KeyError:
+            return Response({'message': 'body doesn\'t contain uuid'})
+
+    def put(self, request, uuid):
         """
         Updates the task => mainly for finishing task
         """
         try:
-            task = self.get_object(request.data['uuid'])
+            task = self.get_object(uuid)
         except Task.DoesNotExist:
             return Http404
         serializer = TasksSerializer(task, request.data, partial=True)
@@ -65,21 +75,8 @@ class TaskView(APIView):
             return Response({'message': 'updated', 'data': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, uuid):
-        """
-        Delete task based on the uuid
-        """
-        try:
-            task = Task.objects.get(uuid=uuid)
-            task.delete()
-            return Response({'message': 'task deleted'})
-        except Task.DoesNotExist:
-            return Http404
-        except KeyError:
-            return Response({'message': 'body doesn\'t contain uuid'})
 
-
-class ProjectView(APIView):
+class ProjectsView(APIView):
 
     def get(self, request):
         """
@@ -101,13 +98,33 @@ class ProjectView(APIView):
                             status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request):
+
+class ProjectModifyView(APIView):
+
+    def get_object(self, uuid):
+        try:
+            project = Project.objects.get(uuid=uuid)
+            return project
+        except Project.DoesNotExist:
+            return Http404
+
+    def put(self, request, uuid):
+        try:
+            project = self.get_object(uuid)
+        except Task.DoesNotExist:
+            return Http404
+        serializer = ProjectSerializer(project, request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'updated', 'data': serializer.data})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, uuid):
         """
         Delete project based on the uuid
         """
         try:
-            uuid = request.data['uuid']
-            project = Project.objects.get(uuid=uuid)
+            project = self.get_object(uuid)
             project.delete()
             return Response({'message': 'project deleted'})
         except Project.DoesNotExist:
