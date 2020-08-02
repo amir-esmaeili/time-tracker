@@ -9,6 +9,9 @@ from .serializer import TasksSerializer, ProjectSerializer
 
 class TasksView(APIView):
 
+    def get_object(self, **kwargs):
+        pass
+
     def get(self, request):
         """
         Returns all of tasks
