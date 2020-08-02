@@ -2,22 +2,25 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Task, Project
 from .serializer import TasksSerializer, ProjectSerializer
+from rest_framework.authtoken.models import Token
 
 
 class TasksView(APIView):
 
     def get_object(self, **kwargs):
-        pass
+        return Task.objects.filter(**kwargs)
 
     def get(self, request):
         """
         Returns all of tasks
         """
-        done = Task.objects.filter(end_time__isnull=False)
-        tasks = Task.objects.filter(end_time__isnull=True)
+        user = Token.objects.get(key=request.auth.key).user_id
+        done = self.get_object(user=user, end_time__isnull=False)
+        tasks = self.get_object(user=user, end_time__isnull=True)
         serializer_done = TasksSerializer(done, many=True)
         serializer_tasks = TasksSerializer(tasks, many=True)
         return Response({'tasks': serializer_tasks.data,
@@ -42,21 +45,22 @@ class TasksView(APIView):
 
 class TasksModifyView(APIView):
 
-    def get_object(self, task_uuid):
+    def get_object(self, **kwargs):
         """
         Finds and returns an object based on the key provided
         """
         try:
-            return Task.objects.get(uuid=task_uuid)
+            return Task.objects.get(**kwargs)
         except Task.DoesNotExist:
             return Http404
 
-    def delete_task(self, uuid):
+    def delete(self, request, uuid):
         """
         Delete task based on the uuid
         """
+        user = Token.objects.get(key=request.auth.key).user_id
         try:
-            task = self.get_object(uuid)
+            task = self.get_object(user=user, task_uuid=uuid)
             task.delete()
             return Response({'message': 'task deleted'})
         except Task.DoesNotExist:
@@ -68,8 +72,9 @@ class TasksModifyView(APIView):
         """
         Updates the task => mainly for finishing task
         """
+        user = Token.objects.get(key=request.auth.key).user_id
         try:
-            task = self.get_object(uuid)
+            task = self.get_object(user=user, task_uuid=uuid)
         except Task.DoesNotExist:
             return Http404
         serializer = TasksSerializer(task, request.data, partial=True)
@@ -81,11 +86,16 @@ class TasksModifyView(APIView):
 
 class ProjectsView(APIView):
 
+    def get_object(self, **kwargs):
+        projects = Project.objects.filter(**kwargs)
+        return projects
+
     def get(self, request):
         """
         Sends all of the projects
         """
-        projects = Project.objects.all()
+        user = Token.objects.get(key=request.auth.key).user_id
+        projects = self.get_object(user=user)
         serializer = ProjectSerializer(projects, many=True)
         return Response({'projects': serializer.data}, status=status.HTTP_200_OK)
 
@@ -104,16 +114,17 @@ class ProjectsView(APIView):
 
 class ProjectModifyView(APIView):
 
-    def get_object(self, uuid):
+    def get_object(self, **kwargs):
         try:
-            project = Project.objects.get(uuid=uuid)
+            project = Project.objects.get(**kwargs)
             return project
         except Project.DoesNotExist:
             return Http404
 
     def put(self, request, uuid):
+        user = Token.objects.get(key=request.auth.key).user_id
         try:
-            project = self.get_object(uuid)
+            project = self.get_object(user=user, uuid=uuid)
         except Task.DoesNotExist:
             return Http404
         serializer = ProjectSerializer(project, request.data, partial=True)
@@ -126,8 +137,9 @@ class ProjectModifyView(APIView):
         """
         Delete project based on the uuid
         """
+        user = Token.objects.get(key=request.auth.key).user_id
         try:
-            project = self.get_object(uuid)
+            project = self.get_object(user=user, uuid=uuid)
             project.delete()
             return Response({'message': 'project deleted'})
         except Project.DoesNotExist:

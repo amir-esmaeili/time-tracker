@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -7,6 +8,7 @@ from .models import Accounts
 
 
 @api_view(['POST'])
+@permission_classes([])
 def sign_up(request):
     serializer = AccountsSerializer(data=request.data)
     if serializer.is_valid():
@@ -17,6 +19,7 @@ def sign_up(request):
 
 
 @api_view(['POST'])
+@permission_classes([])
 def login(request):
     try:
         username = request.data['username']
@@ -25,7 +28,7 @@ def login(request):
         return Response({'message': 'please provide essentials. username and password required'},
                         status=status.HTTP_400_BAD_REQUEST)
     try:
-        user = Accounts.objects.filter(username=username, password=password).first()
+        user = Accounts.objects.get(username=username, password=password)
         token = Token.objects.create(user=user)
         return Response({'token': token.key})
     except Accounts.DoesNotExist:
