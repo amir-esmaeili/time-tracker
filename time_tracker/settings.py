@@ -57,6 +57,7 @@ MIDDLEWARE = [
 
 
 ROOT_URLCONF = 'time_tracker.urls'
+AUTH_USER_MODEL = 'account.Accounts'
 
 TEMPLATES = [
     {
