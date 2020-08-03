@@ -1,8 +1,15 @@
 from rest_framework.serializers import ModelSerializer
+
 from .models import Accounts
 
 
 class AccountsSerializer(ModelSerializer):
+    def create(self, validated_data):
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
     class Meta:
         model = Accounts
-        fields = '__all__'
+        fields = ('email', 'password', 'username', 'first_name', 'last_name')

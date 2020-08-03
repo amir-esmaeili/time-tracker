@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class Accounts(AbstractUser):
     email = models.EmailField(unique=True)
-    REQUIRED_FIELD = [email]
+    first_name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.email
