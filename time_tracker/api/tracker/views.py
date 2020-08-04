@@ -18,7 +18,7 @@ class TasksView(APIView):
         """
         Returns all of tasks
         """
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         done = self.get_object(user=user, end_time__isnull=False)
         tasks = self.get_object(user=user, end_time__isnull=True)
         serializer_done = TasksSerializer(done, many=True)
@@ -31,6 +31,7 @@ class TasksView(APIView):
         """
         Adds a new task to database
         """
+        request.data['user'] = request.user.id
         serializer = TasksSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -58,9 +59,9 @@ class TasksModifyView(APIView):
         """
         Delete task based on the uuid
         """
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         try:
-            task = self.get_object(user=user, task_uuid=uuid)
+            task = self.get_object(user=user, uuid=uuid)
             task.delete()
             return Response({'message': 'task deleted'})
         except Task.DoesNotExist:
@@ -72,9 +73,9 @@ class TasksModifyView(APIView):
         """
         Updates the task => mainly for finishing task
         """
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         try:
-            task = self.get_object(user=user, task_uuid=uuid)
+            task = self.get_object(user=user, uuid=uuid)
         except Task.DoesNotExist:
             return Http404
         serializer = TasksSerializer(task, request.data, partial=True)
@@ -94,7 +95,7 @@ class ProjectsView(APIView):
         """
         Sends all of the projects
         """
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         projects = self.get_object(user=user)
         serializer = ProjectSerializer(projects, many=True)
         return Response({'projects': serializer.data}, status=status.HTTP_200_OK)
@@ -122,7 +123,7 @@ class ProjectModifyView(APIView):
             return Http404
 
     def put(self, request, uuid):
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         try:
             project = self.get_object(user=user, uuid=uuid)
         except Task.DoesNotExist:
@@ -137,7 +138,7 @@ class ProjectModifyView(APIView):
         """
         Delete project based on the uuid
         """
-        user = Token.objects.get(key=request.auth.key).user_id
+        user = request.user.id
         try:
             project = self.get_object(user=user, uuid=uuid)
             project.delete()

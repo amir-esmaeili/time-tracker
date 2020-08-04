@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework.authtoken',
     'time_tracker.account.apps.AccountConfig',
-    'djoser'
 ]
 
 MIDDLEWARE = [
@@ -86,15 +85,13 @@ REST_FRAMEWORK = {
 
 WSGI_APPLICATION = 'time_tracker.wsgi.application'
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+       'http://localhost:4200',
+)
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
+
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(hours=10),
-}
-DJOSER = {
-    'SERIALIZERS': {
-         'user_create': 'time_tracker.account.serializer.AccountsSerializer',
-    }
 }
 
 # Database
