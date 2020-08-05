@@ -3,5 +3,5 @@ from .views import ReportView
 
 
 urlpatterns = [
-    path('<slug:period>/', ReportView.as_view(), name='report')
+    path('<slug:start>,<slug:end>/', ReportView.as_view(), name='report')
 ]

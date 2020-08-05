@@ -19,8 +19,8 @@ class TasksView(APIView):
         Returns all of tasks
         """
         user = request.user.id
-        done = self.get_object(user=user, end_time__isnull=False)
-        tasks = self.get_object(user=user, end_time__isnull=True)
+        done = self.get_object(user=user, end_time__isnull=False).prefetch_related('project')
+        tasks = self.get_object(user=user, end_time__isnull=True).prefetch_related('project')
         serializer_done = TasksSerializer(done, many=True)
         serializer_tasks = TasksSerializer(tasks, many=True)
         return Response({'tasks': serializer_tasks.data,

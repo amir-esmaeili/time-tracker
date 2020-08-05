@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from time_tracker.api.tracker.models import Task
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,37 +7,35 @@ from rest_framework import status
 
 class ReportView(APIView):
 
-    def get_object(self, days):
-        start_date = date.today() - timedelta(days=days)
-        tasks = Task.objects.filter(start_time__gt=start_date)
+    def get_object(self, **kwargs):
+        start_date = date.today() - timedelta(days=kwargs['day'])
+        tasks = Task.objects.filter(start_time__gt=start_date, user=kwargs['user'])
         return tasks
 
-    def get(self, request, period):
+    def get(self, request, start, end):
 
-        if period == 'day':
-            days = 1
-        elif period == 'week':
-            days = 7
-        elif period == 'month':
-            days = 30
-        else:
-            return Response({'message': 'Chosen period must be day/week/month.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not end:
+            end = date.today()
 
         work_hours = dict()
 
-        start_date = date.today() - timedelta(days=days-1)
+        start = datetime.strptime(start, '%Y-%m-%d')
+        end = datetime.strptime(end, '%Y-%m-%d')
 
-        while start_date != date.today() + timedelta(days=1):
-            task = Task.objects.filter(start_time__date=start_date)
+        now = start
+
+        while now != end:
+            user = request.user
+            task = Task.objects.filter(start_time__date=now, user=user)
             if len(task) > 0:
                 time_in_hour = 0
                 for t in task:
                     time_in_hour += (t.end_time - t.start_time).total_seconds()/3600
-                work_hours[start_date.strftime('%b-%d')] = time_in_hour.__round__(2)
+                work_hours[now.strftime('%b-%d')] = time_in_hour.__round__(2)
             else:
-                work_hours[start_date.strftime('%b-%d')] = 0
+                work_hours[now.strftime('%b-%d')] = 0
 
-            start_date += timedelta(days=1)
+            now += timedelta(days=1)
 
         return Response({
             'work_hours': work_hours,
