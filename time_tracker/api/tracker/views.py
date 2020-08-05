@@ -104,8 +104,8 @@ class ProjectsView(APIView):
         """
         Add new project
         """
+        request.data['user'] = request.user.id
         serializer = ProjectSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'New project added', 'project': serializer.data},
@@ -122,10 +122,10 @@ class ProjectModifyView(APIView):
         except Project.DoesNotExist:
             return Http404
 
-    def put(self, request, uuid):
+    def put(self, request, id):
         user = request.user.id
         try:
-            project = self.get_object(user=user, uuid=uuid)
+            project = self.get_object(user=user, id=id)
         except Task.DoesNotExist:
             return Http404
         serializer = ProjectSerializer(project, request.data, partial=True)
@@ -134,13 +134,13 @@ class ProjectModifyView(APIView):
             return Response({'message': 'updated', 'data': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, uuid):
+    def delete(self, request, id):
         """
         Delete project based on the uuid
         """
         user = request.user.id
         try:
-            project = self.get_object(user=user, uuid=uuid)
+            project = self.get_object(user=user, id=id)
             project.delete()
             return Response({'message': 'project deleted'})
         except Project.DoesNotExist:
