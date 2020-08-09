@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Task, Project
-from .serializer import TasksSerializer, ProjectSerializer
+from .serializer import TasksSerializer, ProjectSerializer, NewTaskSerializer
 from rest_framework.authtoken.models import Token
 
 
@@ -32,7 +32,7 @@ class TasksView(APIView):
         Adds a new task to database
         """
         request.data['user'] = request.user.id
-        serializer = TasksSerializer(data=request.data)
+        serializer = NewTaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
 
@@ -78,7 +78,7 @@ class TasksModifyView(APIView):
             task = self.get_object(user=user, uuid=uuid)
         except Task.DoesNotExist:
             return Http404
-        serializer = TasksSerializer(task, request.data, partial=True)
+        serializer = NewTaskSerializer(task, request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'updated', 'data': serializer.data})
