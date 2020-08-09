@@ -3,6 +3,7 @@ from time_tracker.api.tracker.models import Task
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.db import connection
 
 
 class ReportView(APIView):
@@ -12,7 +13,18 @@ class ReportView(APIView):
         tasks = Task.objects.filter(start_time__gt=start_date, user=kwargs['user'])
         return tasks
 
+    def pie_chart(self, start, end):
+        curs = connection.cursor()
+        curs.execute('''
+        select sum(extract(epoch from (end_time::timestamp - start_time::timestamp))), project_id 
+        from tracker_task group by project_id;
+        ''')
+        result = curs.fetchall()
+        return result
+
     def get(self, request, start, end):
+
+        pie_chart = self.pie_chart(start, end)
 
         if not end:
             end = date.today()
@@ -39,6 +51,7 @@ class ReportView(APIView):
 
         return Response({
             'work_hours': work_hours,
+            'project_base': pie_chart,
             'total': sum(work_hours.values())
         }, status=status.HTTP_200_OK)
 
