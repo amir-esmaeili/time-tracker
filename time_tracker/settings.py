@@ -99,13 +99,8 @@ SIMPLE_JWT = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'time_tracker',
-        'USER': 'amiresm',
-        'PASSWORD': 'A137915a',
-        'HOST': '127.0.0.1',
-        'PORT': '5432'
-
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': './time_tracker.db'
     }
 }
 
