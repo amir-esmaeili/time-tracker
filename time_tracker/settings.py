@@ -24,9 +24,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = ')o57r-vvucc34m6$a#zay!ti)b_i$9eaezgb^8c%76xxykjml-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['timetracker.pythonanywhere.com']
 
 # Application definition
 
