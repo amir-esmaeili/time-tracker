@@ -100,7 +100,7 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': './time_tracker.db'
+        'NAME': '/home/timetracker/time-tracker'
     }
 }
 
