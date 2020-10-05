@@ -26,7 +26,7 @@ SECRET_KEY = ')o57r-vvucc34m6$a#zay!ti)b_i$9eaezgb^8c%76xxykjml-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['timetracker.pythonanywhere.com', 'localhost']
+ALLOWED_HOSTS = ['timetracker.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 # Application definition
 
