@@ -2,22 +2,18 @@
 Time Tracker is an open-source application based on python/django for managing 
 your work hours and tasks easily.
 
-## What's new
-* Project field for task
-* Auto create start time
+## It's live
+You can see the up and running version of this application at [amir-esmaeili.github.io/time-wallet](https://amir-esmaeili.github.io/time-wallet).  
+The front-end project for this application is also available at [time-wallet](https://github.com/amir-esmaeili/time-wallet).  
 
-## How to run
-Simply just move into project directory where you can find **manage.py** 
-and then run the following command
-``$ python manage.py runserver [port]``  
-port is optional.
+## Requirements
+All the requirements are listed in the **requirements.txt** file and just install it using:
+```$ pip install -r requirement.txt```
 
-## API
-``[ip]:[port]/api/v1/tasks/``  
-**GET**  
-Fetches all tasks  
-**POST**  
-Adds a new task  
-``body = {"title": string, "project": int, tag: string }``  
-**DELETE**  
-Deletes all tasks
+## Run this application
+First you need to modify your database path ( I have used sqlite ) in the **settings.py** and then migrate using command below:
+```$ ./manage.py migrate```  
+now run the app.  
+```$ ./manage.py runserver```
+
+**Contributions are welcomed**
