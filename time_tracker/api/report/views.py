@@ -16,8 +16,9 @@ class ReportView(APIView):
     def pie_chart(self, start, end):
         curs = connection.cursor()
         curs.execute('''
-        select sum(extract(epoch from (end_time::timestamp - start_time::timestamp))), project_id 
-        from tracker_task group by project_id;
+            select  project_id, name, sum(CAST((julianday(end_time)-julianday(start_time))*24 AS real)) 
+            from (select * from tracker_task, tracker_project where
+             tracker_task.project_id = tracker_project.id ) group by project_id;
         ''')
         result = curs.fetchall()
         return result
